@@ -11,8 +11,9 @@ pkg_check_modules(CURL REQUIRED libcurl)
 
 include_directories(${GTK3_INCLUDE_DIRS})
 include_directories(${CURL_INCLUDE_DIRS})
+include_directories(src)
 
-add_executable(scal src/scal.c)
+add_executable(scal src/scal.c src/notifications.c)
 
 target_link_libraries(scal ${GTK3_LIBRARIES})
 target_link_libraries(scal ${CURL_LIBRARIES})
