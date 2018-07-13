@@ -42,16 +42,13 @@ void debug_date_t(struct date_t *date) {
           date->day, date->week, date->zone);
 }
 
-void init_default_date(GtkGrid *grid) {
-  struct date_t *current_date = malloc(sizeof(struct date_t));
+void show_calendar_date(GtkGrid *grid, struct date_t *current_date,
+                        struct date_t *show_date) {
   struct date_t *current_month = malloc(sizeof(struct date_t));
   struct date_t *current_month_last = malloc(sizeof(struct date_t));
   GtkWidget *label;
   gchar label_text[32];
   gint index = 1;
-
-  get_current_date(current_date);
-  debug_date_t(current_date);
 
   get_current_month_first(current_month);
   get_current_month_last(current_month_last);
@@ -95,7 +92,6 @@ void init_default_date(GtkGrid *grid) {
     }
   }
 
-  free(current_date);
   free(current_month);
   free(current_month_last);
 }
@@ -173,8 +169,12 @@ static void activate(GtkApplication *app, gpointer user_data) {
   g_debug("init grid event.");
   init_ui_grid_event(GTK_GRID(grid), GTK_WINDOW(window));
 
-  g_debug("init default date.");
-  init_default_date(GTK_GRID(grid));
+  g_debug("default date show.");
+  struct date_t *current_date = g_malloc(sizeof(struct date_t));
+  get_current_date(current_date);
+  debug_date_t(current_date);
+  show_calendar_date(GTK_GRID(grid), current_date, NULL);
+  g_free(current_date);
 
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
 
