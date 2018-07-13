@@ -45,6 +45,7 @@ GNotification *init_notification(GtkWidget *window) {
   g_notification_set_title(notifi, "Title");
   g_notification_set_body(notifi, "Hello world");
 
+  // FIXME: hard code image path.
   icon_file = g_file_new_for_path("../res/scal2.png");
   g_notification_set_icon(notifi, G_ICON(g_file_icon_new(icon_file)));
   status_icon =

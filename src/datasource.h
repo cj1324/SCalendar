@@ -19,6 +19,14 @@
 #ifndef DATASOURCE_H
 #define DATASOURCE_H
 
+struct month_t {
+  int year;
+  int month;
+  int iscurrent;
+  int firstwday;
+  int maxmdays;
+};
+
 struct date_t {
   int year;
   int month;
@@ -28,9 +36,8 @@ struct date_t {
   int flag;
 };
 
-int get_month_days(int year, int month);
-
-void get_current_date(struct date_t *date);
-void get_current_month_first(struct date_t *date);
-void get_current_month_last(struct date_t *date);
+int month_t_set_maxmdays(struct month_t *mon);
+int month_t_set_firstwday(struct month_t *mon);
+int month_t_set_iscurrent(struct month_t *mon);
+int get_current_date(struct date_t *date);
 #endif
