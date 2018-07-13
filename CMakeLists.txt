@@ -13,7 +13,7 @@ include_directories(${GTK3_INCLUDE_DIRS})
 include_directories(${CURL_INCLUDE_DIRS})
 include_directories(src)
 
-add_executable(scal src/scal.c src/notifications.c)
+add_executable(scal src/scal.c src/notifications.c src/datasource.c)
 
 target_link_libraries(scal ${GTK3_LIBRARIES})
 target_link_libraries(scal ${CURL_LIBRARIES})

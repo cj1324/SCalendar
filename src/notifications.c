@@ -3,15 +3,15 @@
  *
  *       Filename:  notifications.c
  *
- *    Description:  
+ *    Description:
  *
  *        Version:  1.0
  *        Created:  06/14/2018 08:00:47 PM
  *       Revision:  none
  *       Compiler:  gcc
  *
- *         Author:  YOUR NAME (), 
- *   Organization:  
+ *         Author:  YOUR NAME (),
+ *   Organization:
  *
  * =====================================================================================
  */
@@ -24,8 +24,13 @@
 
 gboolean status_icon_button_release(GtkStatusIcon *status_icon, GdkEvent *event,
                                     gpointer user_data) {
-  g_debug("status_icon_button_release");
-  gtk_widget_destroy(GTK_WIDGET(user_data));
+  if (gtk_widget_get_visible(GTK_WIDGET(user_data))) {
+    gtk_widget_hide(GTK_WIDGET(user_data));
+  } else {
+    gtk_widget_show_all(GTK_WIDGET(user_data));
+    gtk_window_move(GTK_WINDOW(user_data), 800, 200);
+    gtk_widget_grab_focus(GTK_WIDGET(user_data));
+  }
 }
 
 GNotification *init_notification(GtkWidget *window) {
