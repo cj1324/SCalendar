@@ -25,6 +25,8 @@ struct date_t {
   int flag;
 };
 
+int get_month_days(int year, int month);
+
 void get_current_date(struct date_t *date);
 void get_current_month_first(struct date_t *date);
 void get_current_month_last(struct date_t *date);
