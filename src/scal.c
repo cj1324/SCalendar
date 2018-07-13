@@ -28,6 +28,15 @@
 #define GRID_MONTH_START 2
 #define GRID_CONTRL_START 8
 
+const char weeknames[7][32] = {
+    "周日", "周一", "周二", "周三", "周四", "周五", "周六",
+};
+
+const char monthnames[12][32] = {
+    "一月", "二月", "三月", "四月", "五月",   "六月",
+    "七月", "八月", "九月", "十月", "十一月", "十二月",
+};
+
 void debug_date_t(struct date_t *date) {
   g_debug("debug %.4d-%.2d-%.2d Week:%d  Zone:%d", date->year, date->month,
           date->day, date->week, date->zone);
@@ -42,11 +51,21 @@ void init_default_date(GtkGrid *grid) {
   gint index = 1;
 
   get_current_date(current_date);
+  debug_date_t(current_date);
+
   get_current_month_first(current_month);
   get_current_month_last(current_month_last);
 
-  debug_date_t(current_date);
-  debug_date_t(current_month);
+  // set year
+  label = gtk_grid_get_child_at(GTK_GRID(grid), 1, 0);
+  snprintf((char *)&label_text, 32, "%.4d年", current_date->year);
+  gtk_label_set_text(GTK_LABEL(label), (gchar *)&label_text);
+
+  // set month
+  label = gtk_grid_get_child_at(GTK_GRID(grid), 4, 0);
+  gtk_label_set_text(GTK_LABEL(label), monthnames[current_date->month - 1]);
+
+  // set every days
   for (int i = 0; i <= 5; i++) {
     for (int j = 0; j <= 6; j++) {
       label = gtk_grid_get_child_at(GTK_GRID(grid), j, i + GRID_MONTH_START);
@@ -83,17 +102,13 @@ void init_default_date(GtkGrid *grid) {
 
 static void init_ui_grid(GtkGrid *grid) {
   gtk_grid_attach(GTK_GRID(grid), gtk_button_new_with_label("<"), 0, 0, 1, 1);
-  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" 2018 年 "), 1, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" N 年 "), 1, 0, 2, 1);
   gtk_grid_attach(GTK_GRID(grid), gtk_label_new(""), 3, 0, 1, 1);
-  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" 七月 "), 4, 0, 2, 1);
+  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" N 月 "), 4, 0, 2, 1);
   gtk_grid_attach(GTK_GRID(grid), gtk_button_new_with_label(">"), 6, 0, 1, 1);
 
-  gchar weeknames[7][32] = {
-      " 周日 ", " 周一 ", " 周二 ", " 周三 ", " 周四 ", " 周五 ", " 周六 ",
-  };
-
   for (int i = 0; i <= 6; i++) {
-    gtk_grid_attach(GTK_GRID(grid), gtk_label_new((gchar *)&weeknames[i]), i, 1,
+    gtk_grid_attach(GTK_GRID(grid), gtk_label_new((char *)&weeknames[i]), i, 1,
                     1, 1);
   }
 
@@ -106,7 +121,7 @@ static void init_ui_grid(GtkGrid *grid) {
 
   gtk_grid_attach(GTK_GRID(grid), gtk_button_new_with_label(" X "), 0,
                   GRID_CONTRL_START, 1, 1);
-  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" 第 28 周 "), 1,
+  gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" 第 N 周 "), 1,
                   GRID_CONTRL_START, 5, 1);
   gtk_grid_attach(GTK_GRID(grid), gtk_button_new_with_label(" H "), 6,
                   GRID_CONTRL_START, 1, 1);
@@ -151,13 +166,19 @@ static void activate(GtkApplication *app, gpointer user_data) {
   GNotification *notifi = init_notification(window);
   g_application_send_notification(G_APPLICATION(app), "new-window", notifi);
 
-  g_debug("init grid table.");
+  g_debug("init grid ui.");
   grid = (GtkGrid *)gtk_grid_new();
-
   init_ui_grid(GTK_GRID(grid));
+
+  g_debug("init grid event.");
   init_ui_grid_event(GTK_GRID(grid), GTK_WINDOW(window));
+
+  g_debug("init default date.");
   init_default_date(GTK_GRID(grid));
+
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(grid));
+
+  g_debug("window show.");
   gtk_widget_show_all(GTK_WIDGET(window));
   gtk_window_move(GTK_WINDOW(window), 800, 200);
 }
