@@ -3,7 +3,7 @@ project(SCalendar C)
 
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTK3 REQUIRED gtk+-3.0)
