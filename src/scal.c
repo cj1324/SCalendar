@@ -279,7 +279,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
   gtk_window_move(GTK_WINDOW(window), 800, 200);
 
   g_debug("init timer");
-  g_timeout_add_seconds(10, (GSourceFunc)timer_timeout, grid);
+  g_timeout_add_seconds(300, (GSourceFunc)timer_timeout, grid);
 }
 
 // }}}
