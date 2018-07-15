@@ -46,8 +46,8 @@ GNotification *init_notification(GtkWidget *window) {
   g_notification_set_title(notifi, "Title");
   g_notification_set_body(notifi, "Hello world");
 
-  status_icon =
-      gtk_status_icon_new_from_gicon(G_ICON(g_bytes_icon_new(g_bytes_new_take(scal_icon_png, scal_icon_png_len))));
+  status_icon = gtk_status_icon_new_from_gicon(G_ICON(
+      g_bytes_icon_new(g_bytes_new_take(scal_icon_png, scal_icon_png_len))));
   gtk_status_icon_set_screen(status_icon, gdk_screen_get_default());
   g_signal_connect(status_icon, "button-release-event",
                    G_CALLBACK(status_icon_button_release), (gpointer)window);
