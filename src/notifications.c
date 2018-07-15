@@ -21,6 +21,7 @@
 #include <gtk/gtk.h>
 
 #include "notifications.h"
+#include "scal_icon.h"
 
 gboolean status_icon_button_release(GtkStatusIcon *status_icon, GdkEvent *event,
                                     gpointer user_data) {
@@ -45,11 +46,8 @@ GNotification *init_notification(GtkWidget *window) {
   g_notification_set_title(notifi, "Title");
   g_notification_set_body(notifi, "Hello world");
 
-  // FIXME: hard code image path.
-  icon_file = g_file_new_for_path("../res/scal2.png");
-  g_notification_set_icon(notifi, G_ICON(g_file_icon_new(icon_file)));
   status_icon =
-      gtk_status_icon_new_from_gicon(G_ICON(g_file_icon_new(icon_file)));
+      gtk_status_icon_new_from_gicon(G_ICON(g_bytes_icon_new(g_bytes_new_take(scal_icon_png, scal_icon_png_len))));
   gtk_status_icon_set_screen(status_icon, gdk_screen_get_default());
   g_signal_connect(status_icon, "button-release-event",
                    G_CALLBACK(status_icon_button_release), (gpointer)window);
