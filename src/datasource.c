@@ -17,6 +17,8 @@
  */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 
 #include "datasource.h"
@@ -41,18 +43,19 @@ int get_current_date(struct date_t *date) {
 int month_t_set_firstwday(struct month_t *mon) {
 
   struct tm *timeinfo = malloc(sizeof(struct tm));
+  bzero(timeinfo, sizeof(struct tm));
+
   timeinfo->tm_year = mon->year - 1900;
   timeinfo->tm_mon = mon->month - 1;
   timeinfo->tm_mday = 1;
-  timeinfo->tm_hour = 0;
+  timeinfo->tm_hour = 1;
   timeinfo->tm_min = 0;
-  timeinfo->tm_sec = 0;
-  timeinfo->tm_wday = 0;
+  timeinfo->tm_isdst = 0;
 
   mktime(timeinfo);
 
   mon->firstwday = timeinfo->tm_wday;
-
+  free(timeinfo);
   return 0;
 }
 
@@ -88,5 +91,54 @@ int month_t_set_iscurrent(struct month_t *mon) {
   if (date->year == mon->year && date->month == mon->month) {
     mon->iscurrent = 1;
   }
+  return 0;
+}
+
+const char* getfield(char* line, int num)
+{
+    const char* tok;
+    for (tok = strtok(line, ";");
+            tok && *tok;
+            tok = strtok(NULL, ";\n"))
+    {
+        if (!--num)
+            return tok;
+    }
+    return NULL;
+}
+
+int month_t_set_days(struct month_t *mon) {
+  char path[128];
+  size_t line_len = 1024;
+  char * line;
+  char * tmp;
+
+  line = malloc(line_len);
+  tmp = malloc(line_len);
+
+  struct day_info_t * day_info;
+  snprintf((char *)&path, 128, DATA_PATH_FORMAT, mon->year, mon->month);
+  // TODO check file?>
+  FILE* stream = fopen((char *)&path, "r");
+  while (fgets(line, line_len, stream)){
+    day_info = (struct day_info_t *)malloc(sizeof(struct day_info_t));
+    strncpy(tmp, line, line_len);
+    day_info -> index = atoi(getfield(tmp, 1));
+    strncpy(tmp, line, line_len);
+    strncpy(day_info -> nl_month, getfield(tmp, 2), 8);
+    strncpy(tmp, line, line_len);
+    strncpy(day_info -> nl_day, getfield(tmp, 3), 8);
+    strncpy(tmp, line, line_len);
+    strncpy(day_info -> nl_jieqi, getfield(tmp, 4), 8);
+    strncpy(tmp, line, line_len);
+    strncpy(day_info -> festival, getfield(tmp, 5), 8);
+    strncpy(tmp, line, line_len);
+    day_info -> holiday = atoi(getfield(tmp, 6));
+    strncpy(tmp, line, line_len);
+    strncpy(day_info -> recommend, getfield(tmp, 7), 8);
+  }
+  fclose(stream);
+  free(tmp);
+  free(line);
   return 0;
 }

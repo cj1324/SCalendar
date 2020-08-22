@@ -131,47 +131,115 @@ static gboolean timer_timeout(gpointer user_data) {
 
 // }}}
 
+// {{{ ui render day
+void show_null_day(GtkWidget *image,gint j, gint index){
+  cairo_surface_t *s;
+  cairo_t *cr;
+
+  GdkPixbuf *pixbuf;
+
+  s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 32, 32);
+  cr = cairo_create (s);
+  pixbuf = gdk_pixbuf_get_from_surface(s, 0, 0, 32, 32);
+  cairo_stroke(cr);
+  cairo_destroy (cr);
+  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+}
+
+void show_day_index(cairo_t *cr,gint index){
+  char c[8];
+  if (index > 9){
+    cairo_move_to(cr, 6, 22);
+  } else {
+    cairo_move_to(cr, 12, 22);
+  }
+
+  cairo_set_font_size(cr, 18);
+  snprintf((char *)&c, 8, "%d", index);
+  cairo_text_path(cr, (char *)&c);
+  cairo_set_line_width(cr, 1);
+}
+
+void show_current_day(GtkWidget *image,gint j, gint index){
+  cairo_surface_t *s;
+  cairo_t *cr;
+
+  GdkPixbuf *pixbuf;
+
+  s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 32, 32);
+  cr = cairo_create (s);
+  cairo_rectangle(cr, 0, 0, 31, 31);
+  cairo_set_source_rgb(cr, 0.9, 0.8, 0.7);
+  cairo_fill(cr);
+
+  cairo_set_source_rgb(cr, 1, 0 ,0);
+  show_day_index(cr, index);
+  cairo_stroke(cr);
+  cairo_destroy (cr);
+  pixbuf = gdk_pixbuf_get_from_surface(s, 0, 0, 32, 32);
+  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+}
+
+void show_month_day(GtkWidget *image,gint j, gint index){
+  cairo_surface_t *s;
+  cairo_t *cr;
+
+  GdkPixbuf *pixbuf;
+  s = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 32, 32);
+  cr = cairo_create (s);
+
+  if (j == 0 || j == 6){
+    cairo_set_source_rgb(cr, 0.8, 0.8, 0.8);
+    cairo_rectangle(cr,0, 0, 31, 31);
+    cairo_fill(cr);
+  }
+
+  cairo_set_source_rgb(cr, 0, 0 ,0);
+  show_day_index(cr, index);
+  cairo_stroke(cr);
+  cairo_destroy (cr);
+  pixbuf = gdk_pixbuf_get_from_surface(s, 0, 0, 32, 32);
+  gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
+}
+// }}}
+
 // {{{ ui update
 void show_calendar_date(GtkGrid *grid, struct month_t *mon,
                         struct date_t *current_date) {
-  GtkWidget *label;
+  GtkWidget *label, *image;
   gchar label_text[32];
   gint index = 1;
+  gint current_day = 0;
 
   // set year
   label = gtk_grid_get_child_at(GTK_GRID(grid), 1, 0);
-  snprintf((char *)&label_text, 32, "%.4d年", mon->year);
+  snprintf((char *)&label_text, 32, "%.4d 年", mon->year);
   gtk_label_set_text(GTK_LABEL(label), (gchar *)&label_text);
 
   // set month
   label = gtk_grid_get_child_at(GTK_GRID(grid), 4, 0);
   gtk_label_set_text(GTK_LABEL(label), monthnames[mon->month - 1]);
 
+
   // set every days
   for (int i = 0; i <= 5; i++) {
     for (int j = 0; j <= 6; j++) {
-      label = gtk_grid_get_child_at(GTK_GRID(grid), j, i + GRID_MONTH_START);
+      image = gtk_grid_get_child_at(GTK_GRID(grid), j, i + GRID_MONTH_START);
       if (i == 0 && j < mon->firstwday) {
-        gtk_label_set_text(GTK_LABEL(label), "");
+        show_null_day(image, j, index);
         continue;
       }
 
       if (index > mon->maxmdays) {
-        gtk_label_set_text(GTK_LABEL(label), "");
+        show_null_day(image, j, index);
         continue;
       }
 
       if (index == current_date->day && mon->iscurrent) {
-        const char *format = "<span weight=\"bold\" background=\"#FF0000\" "
-                             "foreground=\"#FFFFFF\" size=\"large\" > \%d "
-                             "</span>";
-        char *markup;
-        markup = g_markup_printf_escaped(format, index);
-        gtk_label_set_markup(GTK_LABEL(label), markup);
-        g_free(markup);
+        show_current_day(image, j, index);
+        current_day = 1;
       } else {
-        snprintf((char *)&label_text, 32, " %d ", index);
-        gtk_label_set_text(GTK_LABEL(label), (char *)&label_text);
+        show_month_day(image, j, index);
       }
       index++;
     }
@@ -192,10 +260,13 @@ static void init_ui_grid(GtkGrid *grid) {
                     1, 1);
   }
 
+
   for (int i = 0; i <= 6; i++) {
     for (int j = 0; j <= 5; j++) {
-      gtk_grid_attach(GTK_GRID(grid), gtk_label_new(" # "), i,
-                      j + GRID_MONTH_START, 1, 1);
+      gtk_grid_attach(
+          GTK_GRID(grid),
+          gtk_image_new_from_icon_name("image-x-generic", GTK_ICON_SIZE_DND), i,
+          j + GRID_MONTH_START, 1, 1);
     }
   }
 
@@ -242,6 +313,7 @@ static void activate(GtkApplication *app, gpointer user_data) {
 
   window = gtk_application_window_new(app);
   gtk_window_set_title(GTK_WINDOW(window), "Calendar");
+  gtk_window_stick(GTK_WINDOW(window));
 
   GNotification *notifi = init_notification(window);
 

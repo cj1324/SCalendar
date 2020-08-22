@@ -22,4 +22,9 @@ void show_calendar_date(GtkGrid *grid, struct month_t *mon,
                         struct date_t *current_date);
 
 static void activate(GtkApplication *app, gpointer user_data);
+
+void show_null_day(GtkWidget *image,gint j, gint index);
+void show_current_day(GtkWidget *image,gint j, gint index);
+void show_month_day(GtkWidget *image,gint j, gint index);
+
 #endif
